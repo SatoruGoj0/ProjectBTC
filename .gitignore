@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+
+# build output
+.next/
+out/
+build/
+
+# env files
+.env
+.env.*
+!.env.example
+
+# vercel
+.vercel
+
+# local tooling
+.claude/settings.local.json
+
+# os
+.DS_Store
+Thumbs.db
+desktop.ini
