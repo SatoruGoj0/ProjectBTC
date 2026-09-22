@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { JetBrains_Mono, Manrope, Oswald } from "next/font/google";
 import { notFound } from "next/navigation";
 
 import "../globals.css";
@@ -12,28 +11,13 @@ import { Nav } from "@/components/ui/Nav";
 import { SmoothScroll } from "@/components/ui/SmoothScroll";
 import { SceneMount } from "@/components/three/SceneMount";
 
-/* Every family below ships Latin, Latin-Ext (Azerbaijani ə, ğ, ı, ö, ş, ü)
- * and Cyrillic, so all three locales render in the same type system. */
-
-const display = Oswald({
-  subsets: ["latin", "latin-ext", "cyrillic"],
-  weight: ["300", "400", "500", "600"],
-  variable: "--font-oswald",
-  display: "swap",
-});
-
-const body = Manrope({
-  subsets: ["latin", "latin-ext", "cyrillic"],
-  variable: "--font-manrope",
-  display: "swap",
-});
-
-const mono = JetBrains_Mono({
-  subsets: ["latin", "latin-ext", "cyrillic"],
-  weight: ["400", "500"],
-  variable: "--font-jetbrains",
-  display: "swap",
-});
+/* The locale whose subset the body copy needs first. The wordmark in the hero
+ * is Latin in every locale, so that face is always worth preloading. */
+const BODY_SUBSET: Record<Locale, string> = {
+  az: "latin-ext",
+  ru: "cyrillic",
+  en: "latin",
+};
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -94,10 +78,25 @@ export default async function LocaleLayout({
   const dict = getDictionary(typedLocale);
 
   return (
-    <html
-      lang={htmlLang[typedLocale]}
-      className={`${display.variable} ${body.variable} ${mono.variable}`}
-    >
+    <html lang={htmlLang[typedLocale]}>
+      <head>
+        {/* The hero wordmark is the LCP element; the lead paragraph sits right
+            under it. Everything else can arrive with font-display: swap. */}
+        <link
+          rel="preload"
+          href="/fonts/oswald-latin.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href={`/fonts/manrope-${BODY_SUBSET[typedLocale]}.woff2`}
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="bg-void text-bone antialiased">
         {/* Reveal animations start hidden and are released by JavaScript.
             Without it, unhide everything so the page is still readable. */}
